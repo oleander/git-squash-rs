@@ -127,6 +127,11 @@ fn prompt_for_commit_message() -> Result<String> {
 }
 
 fn main() -> Result<Message> {
+  ctrlc::set_handler(move || {
+    let term = console::Term::stdout();
+    let _ = term.show_cursor();
+  })?;
+
   let repo = Repository::open_ext(".", git2::RepositoryOpenFlags::empty(), Vec::<&Path>::new()).context("Failed to open repo")?;
   let mut items = vec!["➜ [Enter] Custom commit message".to_string()];
   let cli: Cli = Cli::parse();
