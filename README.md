@@ -1,4 +1,4 @@
-# Git Soft Reset Tool
+# Git Soft Reset Tool [![Rust](https://github.com/oleander/git-squash-rs/actions/workflows/rust.yml/badge.svg)](https://github.com/oleander/git-squash-rs/actions/workflows/rust.yml)
 
 This tool helps you squash a specified number of commits into one with a more meaningful commit message. It provides a convenient way to squash commits without manually rebasing and interacting with the `git` command line.
 
