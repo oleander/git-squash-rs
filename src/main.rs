@@ -61,10 +61,7 @@ trait HoursAgo {
 
 impl HoursAgo for Time {
   fn hours_ago(&self) -> String {
-    let now = std::time::SystemTime::now()
-      .duration_since(std::time::UNIX_EPOCH)
-      .unwrap()
-      .as_secs() as i64;
+    let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs() as i64;
     let hours = (now - self.seconds()) / SECONDS_IN_HOUR;
     format!("{: <8}", format!("{} h", hours))
   }
@@ -74,7 +71,7 @@ impl HoursAgo for Time {
 #[clap(author, version, about)]
 struct Cli {
   #[clap()]
-  amount: usize,
+  amount: usize
 }
 
 fn iter_topological_commits(repo: &Repository, amount: usize) -> Result<impl Iterator<Item = Result<Commit, git2::Error>>> {
@@ -85,7 +82,7 @@ fn iter_topological_commits(repo: &Repository, amount: usize) -> Result<impl Ite
   Ok(
     revwalk
       .take(amount)
-      .map(|oid_result| oid_result.and_then(|oid| repo.find_commit(oid).map_err(Into::into))),
+      .map(|oid_result| oid_result.and_then(|oid| repo.find_commit(oid).map_err(Into::into)))
   )
 }
 
@@ -103,11 +100,7 @@ fn git_soft_reset(repo: &Repository, amount: usize, message: &String) -> Result<
 }
 
 fn commits(repo: &Repository, amount: usize) -> Result<Vec<Commit>> {
-  Ok(
-    iter_topological_commits(repo, amount)?
-      .filter_map(Result::ok)
-      .collect::<Vec<Commit>>(),
-  )
+  Ok(iter_topological_commits(repo, amount)?.filter_map(Result::ok).collect::<Vec<Commit>>())
 }
 
 fn validate_input(input: &String) -> Result<()> {
@@ -129,7 +122,10 @@ fn prompt_for_commit_message() -> Result<String> {
 fn main() -> Result<Message> {
   // Show cursor on exit whenever ctrl-c is pressed
   ctrlc::set_handler(move || {
-    console::Term::stdout().show_cursor().expect("Failed to show cursor");
+    println!("Terminating...");
+    let stream = console::Term::stdout();
+    let _value = stream.show_cursor().ok();
+    std::process::exit(0);
   })?;
 
   let repo = Repository::open_ext(".", git2::RepositoryOpenFlags::empty(), Vec::<&Path>::new()).context("Failed to open repo")?;
@@ -149,17 +145,19 @@ fn main() -> Result<Message> {
     .items(&items)
     .default(0)
     .interact()
-    .context("Failed to et selection")?;
+    .context("Failed to set selection")?;
 
   let message = match selection {
     0 => prompt_for_commit_message(),
-    n if n <= messages.len() => commits(&repo, cli.amount)?
-      .get(n - 1)
-      .context("Failed to get commit")?
-      .message()
-      .map(|s| s.to_string())
-      .context("Failed to get commit message"),
-    _ => bail!("Invalid selection"),
+    n if n <= messages.len() => {
+      commits(&repo, cli.amount)?
+        .get(n - 1)
+        .context("Failed to get commit")?
+        .message()
+        .map(|s| s.to_string())
+        .context("Failed to get commit message")
+    },
+    _ => bail!("Invalid selection")
   }?;
 
   git_soft_reset(&repo, cli.amount, &message)?;
@@ -169,19 +167,16 @@ fn main() -> Result<Message> {
 
 #[cfg(test)]
 mod tests {
-  use std::{fs::File, io::Write};
-
+  use std::fs::File;
+  use std::io::Write;
   use super::*;
-  use git2::{Time, IndexAddOption};
+  use git2::{IndexAddOption, Time};
   use log::{info, LevelFilter};
   use tempdir::TempDir;
 
   #[test]
   fn test_2_hours_ago() {
-    let now = std::time::SystemTime::now()
-      .duration_since(std::time::UNIX_EPOCH)
-      .unwrap()
-      .as_secs() as i64;
+    let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs() as i64;
     let two_hours_ago = now - (SECONDS_IN_HOUR * 2);
     let hours = Time::new(two_hours_ago, 0).hours_ago();
     assert_eq!(hours.trim(), "2 h");
@@ -189,10 +184,7 @@ mod tests {
 
   #[test]
   fn test_0_hours_ago() {
-    let now = std::time::SystemTime::now()
-      .duration_since(std::time::UNIX_EPOCH)
-      .unwrap()
-      .as_secs() as i64;
+    let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs() as i64;
     let time = Time::new(now, 0);
     let hours = time.hours_ago();
     assert_eq!(hours.trim(), "0 h");
@@ -247,9 +239,7 @@ mod tests {
       file.write_all(content.as_bytes()).context("Failed to write file")?;
       let message = format!("Commit {}", n);
       let mut index = repo.index().context("Failed to get index")?;
-      index
-        .add_all([name], IndexAddOption::DEFAULT, None)
-        .context("Failed to add file")?;
+      index.add_all([name], IndexAddOption::DEFAULT, None).context("Failed to add file")?;
       repo.commit_with_msg(message.as_ref()).context("Failed to commit")?;
     }
 
@@ -311,9 +301,7 @@ mod tests {
       file.write_all(content.as_bytes()).context("Failed to write file")?;
       let message = format!("Commit {}", n);
       let mut index = repo.index().context("Failed to get index")?;
-      index
-        .add_all([name], IndexAddOption::DEFAULT, None)
-        .context("Failed to add file")?;
+      index.add_all([name], IndexAddOption::DEFAULT, None).context("Failed to add file")?;
       repo.commit_with_msg(message.as_ref()).context("Failed to commit")?;
     }
     let commits_list = commits(&repo, 3)?;
