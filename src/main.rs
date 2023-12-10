@@ -127,9 +127,9 @@ fn prompt_for_commit_message() -> Result<String> {
 }
 
 fn main() -> Result<Message> {
+  // Show cursor on exit whenever ctrl-c is pressed
   ctrlc::set_handler(move || {
-    let term = console::Term::stdout();
-    let _ = term.show_cursor();
+    console::Term::stdout().show_cursor().expect("Failed to show cursor");
   })?;
 
   let repo = Repository::open_ext(".", git2::RepositoryOpenFlags::empty(), Vec::<&Path>::new()).context("Failed to open repo")?;

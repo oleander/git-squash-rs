@@ -2,9 +2,9 @@ name: Rust
 
 on:
   push:
-    branches: ["main"]
+    branches: [main]
   pull_request:
-    branches: ["main"]
+    branches: [main]
 
 env:
   CARGO_TERM_COLOR: always
@@ -18,7 +18,7 @@ jobs:
       - name: Build
         run: cargo build --verbose
       - run: |
-            git config --global user.name "John Doe"
-            git config --global user.email "hello@example.com"
+          git config --global user.name "John Doe"
+          git config --global user.email "hello@example.com"
       - name: Run tests
         run: cargo test --verbose
