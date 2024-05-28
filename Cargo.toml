@@ -9,14 +9,14 @@ edition = "2021"
 debug = true
 
 [dependencies]
-clap = { version = "4.4.8", features = ["derive", "wrap_help"] }
-dialoguer = "0.11.0"
+clap = { version = "4.4.8", features = ["derive"] }
+dialoguer = { version = "0.11.0", default-features = false }
 anyhow = "1.0.75"
-git2 = "0.18.1"
+git2 = { version = "0.18.1", default-features = false }
 log = "0.4.20"
 ctrlc = "3.4.1"
-console = "0.15.7"
+console = { version = "0.15.7", default-features = false }
 
 [dev-dependencies]
 tempdir = "0.3.7"
-env_logger = "0.10.0"
+env_logger = { version = "0.10.0", default-features = false }
